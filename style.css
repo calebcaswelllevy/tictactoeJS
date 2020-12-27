@@ -1,0 +1,89 @@
+
+/*Reset margin, padding, and set fonts:*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+#holder {
+    background: rgb(38, 70, 83, .2);
+}
+  /* Center content*/
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #eee;
+}
+
+/*format the board*/
+.board {
+    display: grid;
+    width: 450px;
+    height: 450px;
+    grid-template-columns:auto auto auto;
+}
+.square {
+    display: flex;
+    width: 150px;
+    height: 150px;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    border: 3px solid black;
+    background-color: #2A9D8F;
+    transition: background 0.2s ease-in-out;
+}
+ /*make squares respond to hovering*/
+.square:hover {
+    cursor: pointer;
+    background: #E9C46A;
+}
+
+.occupied:hover {
+    background:  #2A9D8F;
+    cursor: not-allowed;
+}
+
+/*Fix side borders*/
+
+#S0,
+#S1,
+#S2 {
+    border-top: none;
+}
+
+#S0,
+#S3,
+#S6 {
+     border-left:none;
+}
+
+#S2,
+#S5,
+#S8 {
+    border-right: none;
+}
+
+#S6,
+#S7,
+#S8 {
+    border-bottom: none;
+}
+#S0 {
+    border-top-left-radius:10px;
+}
+#S2 {
+    border-top-right-radius:10px;
+}
+#S6 {
+    border-bottom-left-radius: 10px;
+}
+#S8 {
+    border-bottom-right-radius:10px;
+}
