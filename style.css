@@ -87,3 +87,52 @@
 #S8 {
     border-bottom-right-radius:10px;
 }
+
+/*Format the buttons*/
+.btn {
+    border:none;
+    border-radius: 5px;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+    padding: 25px 80px;
+    display: inline-block;
+    margin: 15px 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    outline: none;
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+#reset {
+    background:#e76f51;
+    color:#FFFFFF;
+}
+
+#reset:hover {
+    background:#E24E29;
+}
+#reset:active {
+    background:#E24E29;
+    top:2px;
+}
+
+#play {
+    background: #2F5767;
+    color: #FFF;
+}
+
+#play:hover {
+    background:#1E3842;
+}
+
+#play:active {
+    background:#1E3842;
+    top:2px;
+}
+

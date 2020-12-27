@@ -16,7 +16,11 @@ let gameBoard = (function(){
     function getSquare(square) {
         return squares[square]
     }
-
+    // add event listeners to squares
+    for (let i=0; i<9; i++) {
+        let ref = document.getElementById(`S${i}`)
+        ref.addEventListener('click', () => console.log(`square ${i} clicked`))
+    }
 
     return {
         setSquare,
@@ -40,7 +44,7 @@ let displayController = (() => {
     //To Do: work out the HTML
     let draw = function () {
         for (let i = 0; i < 9; i++) {
-            let s = document.getElementById(`${i}`);
+            let s = document.getElementById(`S${i}`);
             s.innerHTML = gameBoard.getSquare(i);
         }
     };
@@ -49,4 +53,28 @@ let displayController = (() => {
     };
 })()
 
+//implement game loop here, and 
+// set up to run when play button is
+// pressed.
+
+const game = () => {
+    //create player objects
+    let X = player('X');
+    let O = player('O');
+
+    //Check for winner
+    function isWon() {
+        //TO DO...
+    }
+    // While loop that runs while 
+    // won is false:
+    let won = true;
+    while (won === false) {
+        displayController.draw()
+        makeMove(O) 
+        }
+
+}
+
 displayController.draw()
+
