@@ -17,12 +17,43 @@ let gameBoard = (function(){
         return squares[square]
     }
 
+    function listen(player, c) {
+    
+        return (e) => {
+            let i = e.target.id[1]
+            if (gameBoard.getSquare(i) === " ") {
+                choice = i;
+                gameBoard.setSquare(choice, player.side)
+                displayController.draw()
+
+                gameControl.playTurn(c)
+            }
+            
+        }
+    }
+
+    
+    
+
     function reset() {
+        //clear squares
         squares = [];
         for (let i=0; i<9; i++){
             squares.push(" ");
         }
+        //Clear turn indicator
+        turnIndicator = document.getElementById('turn-indicator');
+        turnIndicator.textContent = ""
+
+        //Draw the board again
         displayController.draw();
+
+        //clone nodes to remove event listeners to prevent further play
+        for (let i = 0; i<9; i++) {
+            let ref = document.getElementById(`S${i}`)
+            let newRef = ref.cloneNode(true);
+            ref.parentNode.replaceChild(newRef, ref);
+        }
         return;
     }
    
@@ -31,6 +62,7 @@ let gameBoard = (function(){
         setSquare,
         getSquare,
         reset,
+        listen,
     }
 })();
 
@@ -53,7 +85,7 @@ let displayController = (() => {
 // The functions to control game flow
 // are encapsulated in game()
 
-function game() {
+let gameControl = (function() {
     //to hold player info
     function playerObject(side) {
         type="human"
@@ -63,11 +95,7 @@ function game() {
         }
     }
 
-    //create player objects
-    let X = playerObject('X');
-    let O = playerObject('O');
-    let choice = ""
-    let turnIndicator = document.getElementById('turn-indicator')
+    
 
     //Check for winner
     function isWon() {
@@ -120,62 +148,74 @@ function game() {
         }
     }
 
+
     // Recursion that runs until game is over:
-    let player;
-    let c = 0;
-    function whosTurn() {
+    
+    function whosTurn(c) {
         let player;
-        if (c % 2 === 0) { //even turn
-            player = X;
+        if (c) { //X's turn
+            player = playerObject('X');
         } else {// Odd turn
-            player = O;
+            player = playerObject('O');
         }
-        c++;
-        return player;
+        c = !c
+        return {player, c};
     }
 
-    function humanPlay(player){
-
+    function humanPlay(player, c){
+        console.log('humanPlay')
+        
         //Add event listeners
         for (let i=0; i<9; i++) {
+            //clone nodes to replace event listeners
             let ref = document.getElementById(`S${i}`)
-            ref.addEventListener('click', (e) => {
-                console.log(`square ${i} clicked`)
-                if (gameBoard.getSquare(i) === " ") {
-                    choice = i;
-                    gameBoard.setSquare(choice, player.side)
-                    displayController.draw()
-                    playTurn()
-                }
-                
-            })
-        }
+            let newRef = ref.cloneNode(true);
+            ref.parentNode.replaceChild(newRef, ref);
 
+            //add new event listeners to new nodes
+            newRef.addEventListener('click', gameBoard.listen(player, c));
+        }
 
     }
 
-    function playTurn() {
-        
-        //Check is someone won last turn
+    function playTurn(c) {
+        console.log(`c inside playTurn is ${c}`)
+        //Check if someone won last turn
         if (isWon()) {
-            alert(`Congratulations ${player}`) 
+            
+            let indicator = document.getElementById('turn-indicator');
+            indicator.textContent = ` ${player.side} Wins!`
+
+            //clone nodes to replace event listeners to prevent further play
+            for (let i = 0; i<9; i++) {
+                let ref = document.getElementById(`S${i}`)
+                let newRef = ref.cloneNode(true);
+                ref.parentNode.replaceChild(newRef, ref);
+            }
+            
             return;
     }
         //check if its a cat's game
       else if (catsGame()) {
+        
           alert('Cats Game')
           return;
       } 
       else 
       // the game is still going, play a turn
       { 
-        player = whosTurn();
+        console.log(`c before whoseturn is called is ${c}`)
+        player = whosTurn(c).player;
+       
+        c = whosTurn(c).c;
+        console.log(`c after change is ${c}`)
+        
         turnIndicator.textContent = `${player.side}'s Turn`
         if (false) {
             //add in ai here
             //computerPlay(player)
         } else {
-            humanPlay(player); 
+            humanPlay(player, c); 
                
         }
         //Draw result of last move
@@ -188,9 +228,33 @@ function game() {
       }
 
     }
+
+    return {
+        playerObject,
+        isWon,
+        whosTurn,
+        catsGame,
+        playTurn,
+        humanPlay,
+        
+    }
+})()
 //game() starts turns:
-playTurn()
-return;
+
+
+function game(){
+    //Initialize counter to tell who's turn it is
+    let c = false;
+  
+    //create player objects
+    let X = gameControl.playerObject('X');
+    let O = gameControl.playerObject('O');
+    let choice = ""
+
+    //Show who's up
+    let turnIndicator = document.getElementById('turn-indicator')
+
+    gameControl.playTurn(c);
 }
 
 function setUp() {
@@ -200,4 +264,5 @@ resetButton.addEventListener('click', gameBoard.reset);
 let playButton = document.getElementById('play');
 playButton.addEventListener('click', game)
 }
+
 setUp();
