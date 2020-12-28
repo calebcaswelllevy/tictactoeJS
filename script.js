@@ -1,15 +1,12 @@
 
-// To Do:
-    //Figure out how player moves are going to work
+
+
 let gameBoard = (function(){
     // initialize squares
     let squares = [];
     let choice = '';
 
-    for (let i=0; i<9; i++){
-        squares.push(" ");
-    }
-
+    
     // change square value
     function setSquare(square, player) {
         squares[square] = player;
@@ -19,21 +16,25 @@ let gameBoard = (function(){
     function getSquare(square) {
         return squares[square]
     }
+
+    function reset() {
+        squares = [];
+        for (let i=0; i<9; i++){
+            squares.push(" ");
+        }
+        displayController.draw();
+        return;
+    }
    
 
     return {
         setSquare,
         getSquare,
+        reset,
     }
 })();
 
-let player = function(side) {
-    type="human"
-    return {
-        side:side,
-        type:type,
-    }
-}
+
 
 let displayController = (() => {
     //To Do: work out the HTML
@@ -48,40 +49,54 @@ let displayController = (() => {
     };
 })()
 
-//implement game loop here, and 
-// set up to run when play button is
-// pressed.
 
-const game = () => {
+// The functions to control game flow
+// are encapsulated in game()
+
+function game() {
+    //to hold player info
+    function playerObject(side) {
+        type="human"
+        return {
+            side:side,
+            type:type,
+        }
+    }
+
     //create player objects
-    let X = player('X');
-    let O = player('O');
+    let X = playerObject('X');
+    let O = playerObject('O');
     let choice = ""
     let turnIndicator = document.getElementById('turn-indicator')
 
     //Check for winner
     function isWon() {
+        let board = [];
+        for (let i = 0; i<9; i++){
+            board.push(gameBoard.getSquare(i))
+        }
         //Check rows
-        if (gameBoard.getSquare(0)===gameBoard.getSquare(1) === gameBoard.getSquare(2) !== " " ) {
+        if ((board[0]===board[1]) && (board[1] === board[2]) && (board[2] !== " " )) {
             return true;
-        } else if (gameBoard.getSquare(3)===gameBoard.getSquare(4) === gameBoard.getSquare(5) !== " " ) {
+        } else if ((board[3]===board[4]) && (board[4] === board[5]) && (board[5] !== " " )) {
+
             return true;
-        } else if (gameBoard.getSquare(6)===gameBoard.getSquare(7) === gameBoard.getSquare(8) !== " " ) {
+        } else if ((board[6]===board[7]) && (board[7] === board[8]) && (board[8] !== " " )) {
             return true;
         }
         //Check Columns
-        else if (gameBoard.getSquare(0)===gameBoard.getSquare(3) === gameBoard.getSquare(6) !== " " ) {
+        else if ((board[0]===board[3]) && (board[3] === board[6]) && (board[6] !== " " )) {
             return true;
-        } else if (gameBoard.getSquare(1)===gameBoard.getSquare(4) === gameBoard.getSquare(7) !== " " ) {
+        } else if ((board[1]===board[4]) && (board[4] === board[7]) && (board[7] !== " " )) {
             return true;
-        } else if (gameBoard.getSquare(2)===gameBoard.getSquare(5) === gameBoard.getSquare(8) !== " " ) {
+        } else if ((board[2]===board[5]) && (board[5] === board[8]) && (board[8] !== " " )) {
             return true;
         }
 
         // CHECK DIAGONALS
-        else if (gameBoard.getSquare(0)===gameBoard.getSquare(4) === gameBoard.getSquare(8) !== " " ) {
+        else if ((board[0]===board[4]) && (board[4] === board[8]) && (board[8] !== " " )) {
             return true;
-        } else if (gameBoard.getSquare(2)===gameBoard.getSquare(4) === gameBoard.getSquare(6) !== " " ) {
+        } else if ((board[2]===board[4]) && (board[4] === board[6]) && (board[6] !== " " )) {
             return true;
         }
         
@@ -93,10 +108,11 @@ const game = () => {
 
         let board = [];
         for (let i=0; i<9; i++){
-            board.push(gameBoard.getSquare[i])
+            board.push(gameBoard.getSquare(i));
         }
         // CHECK FOR FULL BOARD
         if (!(board.includes(" "))) {
+            console.log(board);
             return true;
         }
         else {
@@ -114,6 +130,7 @@ const game = () => {
         } else {// Odd turn
             player = O;
         }
+        c++;
         return player;
     }
 
@@ -127,6 +144,8 @@ const game = () => {
                 if (gameBoard.getSquare(i) === " ") {
                     choice = i;
                     gameBoard.setSquare(choice, player.side)
+                    displayController.draw()
+                    playTurn()
                 }
                 
             })
@@ -140,28 +159,45 @@ const game = () => {
         //Check is someone won last turn
         if (isWon()) {
             alert(`Congratulations ${player}`) 
+            return;
     }
         //check if its a cat's game
       else if (catsGame()) {
-          
+          alert('Cats Game')
+          return;
       } 
       else 
       // the game is still going, play a turn
       { 
         player = whosTurn();
-        turnIndicator.textContent = `${player}'s Turn`
+        turnIndicator.textContent = `${player.side}'s Turn`
         if (false) {
             //add in ai here
             //computerPlay(player)
         } else {
             humanPlay(player); 
+               
         }
+        //Draw result of last move
+        
+         
+        
+        return;
+        
+
       }
 
     }
-
-
+//game() starts turns:
+playTurn()
+return;
 }
 
-displayController.draw()
-game()
+function setUp() {
+gameBoard.reset()
+let resetButton = document.getElementById('reset');
+resetButton.addEventListener('click', gameBoard.reset);
+let playButton = document.getElementById('play');
+playButton.addEventListener('click', game)
+}
+setUp();
