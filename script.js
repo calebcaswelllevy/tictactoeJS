@@ -28,15 +28,11 @@ let gameBoard = (function(){
 })();
 
 let player = function(side) {
-    function move(choice) {
-        // is the square unoccupied?
-        if (gameBoard.getSquare(choice) === " " ){
-            gameBoard.setSquare(choice, side)
-        } else {
-            console.log("invalid move")
-        }
+    type="human"
+    return {
+        side:side,
+        type:type,
     }
-    return {move}
 }
 
 let displayController = (() => {
@@ -61,13 +57,10 @@ const game = () => {
     let X = player('X');
     let O = player('O');
     let choice = ""
+    let turnIndicator = document.getElementById('turn-indicator')
+
     //Check for winner
     function isWon() {
-        let won = false
-        let board = [];
-        for (let i=0; i<9; i++){
-            board.push(gameBoard.getSquare[i])
-        }
         //Check rows
         if (gameBoard.getSquare(0)===gameBoard.getSquare(1) === gameBoard.getSquare(2) !== " " ) {
             return true;
@@ -77,7 +70,7 @@ const game = () => {
             return true;
         }
         //Check Columns
-        if (gameBoard.getSquare(0)===gameBoard.getSquare(3) === gameBoard.getSquare(6) !== " " ) {
+        else if (gameBoard.getSquare(0)===gameBoard.getSquare(3) === gameBoard.getSquare(6) !== " " ) {
             return true;
         } else if (gameBoard.getSquare(1)===gameBoard.getSquare(4) === gameBoard.getSquare(7) !== " " ) {
             return true;
@@ -86,38 +79,87 @@ const game = () => {
         }
 
         // CHECK DIAGONALS
-        if (gameBoard.getSquare(0)===gameBoard.getSquare(4) === gameBoard.getSquare(8) !== " " ) {
+        else if (gameBoard.getSquare(0)===gameBoard.getSquare(4) === gameBoard.getSquare(8) !== " " ) {
             return true;
         } else if (gameBoard.getSquare(2)===gameBoard.getSquare(4) === gameBoard.getSquare(6) !== " " ) {
             return true;
         }
-        // CHECK FOR FULL BOARD
-        else if (!(board.includes(" "))) {
-            return true;
-        }
+        
         //else not over yet
         return false;
     }
 
-     // add event listeners to squares
-     for (let i=0; i<9; i++) {
-        let ref = document.getElementById(`S${i}`)
-        ref.addEventListener('click', () => {
-            console.log(`square ${i} clicked`)
-            if (gameBoard.getSquare(i) != " ") {
-                return;
-            }
-            choice = i;
-        })
+    function catsGame () {
+
+        let board = [];
+        for (let i=0; i<9; i++){
+            board.push(gameBoard.getSquare[i])
+        }
+        // CHECK FOR FULL BOARD
+        if (!(board.includes(" "))) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
-    // While loop that runs while 
-    // won is false:
-    let won = false;
-    //while (won === false) {
-      //  displayController.draw()
-        //O.move(choice) 
-        //}
+    // Recursion that runs until game is over:
+    let player;
+    let c = 0;
+    function whosTurn() {
+        let player;
+        if (c % 2 === 0) { //even turn
+            player = X;
+        } else {// Odd turn
+            player = O;
+        }
+        return player;
+    }
+
+    function humanPlay(player){
+
+        //Add event listeners
+        for (let i=0; i<9; i++) {
+            let ref = document.getElementById(`S${i}`)
+            ref.addEventListener('click', (e) => {
+                console.log(`square ${i} clicked`)
+                if (gameBoard.getSquare(i) === " ") {
+                    choice = i;
+                    gameBoard.setSquare(choice, player.side)
+                }
+                
+            })
+        }
+
+
+    }
+
+    function playTurn() {
+        
+        //Check is someone won last turn
+        if (isWon()) {
+            alert(`Congratulations ${player}`) 
+    }
+        //check if its a cat's game
+      else if (catsGame()) {
+          
+      } 
+      else 
+      // the game is still going, play a turn
+      { 
+        player = whosTurn();
+        turnIndicator.textContent = `${player}'s Turn`
+        if (false) {
+            //add in ai here
+            //computerPlay(player)
+        } else {
+            humanPlay(player); 
+        }
+      }
+
+    }
+
 
 }
 
