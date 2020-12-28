@@ -1,4 +1,6 @@
-
+//To do:
+//implement minimax functinos
+//implement play type choice
 
 
 let gameBoard = (function(){
@@ -84,6 +86,64 @@ let displayController = (() => {
 
 // The functions to control game flow
 // are encapsulated in game()
+let ai = (function(){
+    
+    //go through each move and evaluate it using miniMax
+    function findBestMove(gameBoard, side){
+        let bestMove = null;
+        let bestMoveVal = -1000
+        let moves = [];
+        let board = [];
+
+        //find empty squares and make board array
+        for (let i = 0; i<9; i++) {
+            board.push(gameBoard.getSquare(i));
+            if (gameBoard.getSquare(i) === " ") {
+                moves.push(i)
+            }
+        }
+        
+        //find best of possible  moves
+        for (let i = 0; i<moves.length; i++) {
+            let possibleBoard = board;
+            possibleBoard[moves[i]] = side;
+            let currentMoveVal = miniMax(possibleBoard, side);
+            if (currentMoveVal > bestMoveVal) {
+                bestMove = moves[i];
+            }
+        return bestMove;
+        }
+    }
+    function miniMax(board, side) {
+        //to Do
+        return gameValue(board, side);
+    }
+
+    function gameValue (board, side){
+        //To Do:
+        return 0;
+    }
+
+    function makeMove(move, side) {
+        gameBoard.setSquare(move, side)
+    }
+
+    function play(player, c) {
+        let move = findBestMove(gameBoard, player.side);
+        makeMove(move, player.side);
+        displayController.draw();
+        gameControl.playTurn(c);
+        
+    }
+
+    return {//module functions
+        findBestMove,
+        miniMax,
+        gameValue,
+        makeMove,
+        play,
+    }
+})();
 
 let gameControl = (function() {
     //to hold player info
@@ -179,7 +239,7 @@ let gameControl = (function() {
     }
 
     function playTurn(c) {
-        console.log(`c inside playTurn is ${c}`)
+       
         //Check if someone won last turn
         if (isWon()) {
             
@@ -198,22 +258,22 @@ let gameControl = (function() {
         //check if its a cat's game
       else if (catsGame()) {
         
-          alert('Cats Game')
-          return;
+        let indicator = document.getElementById('turn-indicator');
+        indicator.textContent = "Cat's Game!"
+        return;
       } 
       else 
       // the game is still going, play a turn
       { 
-        console.log(`c before whoseturn is called is ${c}`)
+       
         player = whosTurn(c).player;
        
         c = whosTurn(c).c;
-        console.log(`c after change is ${c}`)
+      
         
         turnIndicator.textContent = `${player.side}'s Turn`
         if (false) {
-            //add in ai here
-            //computerPlay(player)
+            ai.play(player, c)
         } else {
             humanPlay(player, c); 
                
