@@ -90,10 +90,11 @@ let ai = (function(){
     
     //go through each move and evaluate it using miniMax
     function findBestMove(gameBoard, side){
-        let bestMove = null;
-        let bestMoveVal = -1000
+        let bestMove = '';
+        let bestMoveVal = -1000;
         let moves = [];
         let board = [];
+        let moveVals = [];
 
         //find empty squares and make board array
         for (let i = 0; i<9; i++) {
@@ -102,37 +103,177 @@ let ai = (function(){
                 moves.push(i)
             }
         }
-        
         //find best of possible  moves
         for (let i = 0; i<moves.length; i++) {
-            let possibleBoard = board;
+            let possibleBoard = board.slice();
             possibleBoard[moves[i]] = side;
-            let currentMoveVal = miniMax(possibleBoard, side);
+        
+            let currentMoveVal = miniMax(possibleBoard, "O", 0);
+            moveVals.push(currentMoveVal)
             if (currentMoveVal > bestMoveVal) {
                 bestMove = moves[i];
+                bestMoveVal = currentMoveVal;
+                console.log(`the best move is ${bestMove}\nIts value is ${currentMoveVal}`)
             }
+        
+        }
+        console.log(`the value of possible moves: `, moveVals)
         return bestMove;
+    }
+    function findWin(board, moves) {
+        for (let i = 0; i<moves.length; i++) {
+            let newBoard = board.slice()
+            newBoard[moves[i]] = "X"
+            if (gameValue(newBoard, "X") == 1) {
+                return 1;
+            } 
+        }
+        return -1;
+    }
+    
+    //run the minimax algorithm
+    function miniMax(board, side, depth) {
+        //base case
+        if (catsGame(board) || (gameValue(board, "X") !== 0)) {
+            
+                return gameValue(board, "X");
+        }
+
+        // if it's the ai's turn
+        
+        if (side === "X") {
+            return maximize(board, depth);
+        }
+
+        //else it's the humans turn
+        else {
+          //return minmize(board, depth);
+          return minimize(board, depth);
+        }
+
+        function maximize(board, depth) {
+            let bestVal = -1000;
+            for (let i = 0; i<9; i++) {
+                if (board[i] === " ") {
+                    let testboard = board.slice()
+                    testboard[i] = "X"
+                    let value = miniMax(testboard, "O", depth+1)
+                    if (value > bestVal){
+                        bestVal = value;
+                    }
+                 }
+            }
+            return bestVal;
+        }
+        function minimize(board, depth) {
+            let bestVal = 1000;
+            
+            for (let i = 0; i<9; i++) {
+                if (board[i] === " ") {
+                    let testboard = board.slice()
+                    testboard[i] = "O"
+                    let value = miniMax(testboard, "X", depth+1)
+                    if ( bestVal > value ) {
+                        bestVal = value;
+                    }
+                }
+            }
+            return bestVal;
+        }
+    
+    }
+    
+    
+    // get value of gamestate
+    function gameValue(board, side) {
+       
+        //check rows:
+        if (board[0] === board[1] && board[1] === board[2] && board[0] !== " ")  {
+            if (board[2] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+        } else if (board[3] === board[4] && board[4] === board[5] && board[3] !== " ") {
+            if (board[3] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+        } else if (board[6] === board[7] && board[7] === board[8] && board[6] !== " ") {
+            if (board[2] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+        
+        // check columns:
+
+        else if (board[0] === board[3] && board[3] === board[6] && board[0] !== " ")  {
+            if (board[6] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+        } else if (board[1] === board[4] && board[4] === board[7] && board[1] !== " ") {
+            if (board[7] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+            
+        } else if (board[2] === board[5] && board[5] === board[7] && board[2] !== " ") {
+            if (board[2] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+
+        // check diagonals
+        else if (board[0] === board[4] && board[4] === board[8] && board[0] !== " ")  {
+            if (board[8] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+
+        } else if (board[2] === board[4] && board[4] === board[7] && board[2] !== " ") {
+            if (board[7] === side) {
+                return 1;
+            } else {
+                return -1;
+            }
+            
+        } else {
+            return 0;
         }
     }
-    function miniMax(board, side) {
-        //to Do
-        return gameValue(board, side);
-    }
-
-    function gameValue (board, side){
-        //To Do:
-        return 0;
-    }
-
+    //put the move on the board
     function makeMove(move, side) {
         gameBoard.setSquare(move, side)
     }
 
-    function play(player, c) {
-        let move = findBestMove(gameBoard, player.side);
-        makeMove(move, player.side);
+    function catsGame (board) {
+
+        if (!(board.includes(" "))) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    //put all the parts together and make a move
+    function play(c) {
+        let move = findBestMove(gameBoard, "X");
+        makeMove(move, "X");
         displayController.draw();
-        gameControl.playTurn(c, gameControl.getMode());
+        gameControl.playTurn(!c, gameControl.getMode());
         
     }
 
@@ -205,7 +346,6 @@ let gameControl = (function() {
         }
         // CHECK FOR FULL BOARD
         if (!(board.includes(" "))) {
-            console.log(board);
             return true;
         }
         else {
@@ -254,7 +394,7 @@ let gameControl = (function() {
         return mode;
     }
     function playTurn(c, mode) {
-       console.log(mode);
+
         //Check if someone won last turn
         if (isWon()) {
             
@@ -290,6 +430,7 @@ let gameControl = (function() {
         if ((mode === "minimax") && (player.type !== "human")) {
             ai.play(player, c)
         } else {
+
             humanPlay(player, c); 
                
         }
