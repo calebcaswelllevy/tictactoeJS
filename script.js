@@ -28,7 +28,7 @@ let gameBoard = (function(){
                 gameBoard.setSquare(choice, player.side)
                 displayController.draw()
 
-                gameControl.playTurn(c)
+                gameControl.playTurn(c, gameControl.getMode())
             }
             
         }
@@ -132,7 +132,7 @@ let ai = (function(){
         let move = findBestMove(gameBoard, player.side);
         makeMove(move, player.side);
         displayController.draw();
-        gameControl.playTurn(c);
+        gameControl.playTurn(c, gameControl.getMode());
         
     }
 
@@ -148,7 +148,12 @@ let ai = (function(){
 let gameControl = (function() {
     //to hold player info
     function playerObject(side) {
-        type="human"
+        let type;
+        if (side === "X") {
+         type =  gameControl.getMode();
+        } else {
+         type = "human";
+        }
         return {
             side:side,
             type:type,
@@ -223,7 +228,6 @@ let gameControl = (function() {
     }
 
     function humanPlay(player, c){
-        console.log('humanPlay')
         
         //Add event listeners
         for (let i=0; i<9; i++) {
@@ -237,9 +241,20 @@ let gameControl = (function() {
         }
 
     }
-
-    function playTurn(c) {
-       
+    function getMode(){
+        let mode;
+        let miniMaxbutton = document.getElementById("minimax")
+        if (miniMaxbutton.checked) {
+            mode = 'minimax'
+        }
+        let humanButton = document.getElementById("human")
+        if (humanButton.checked) {
+            mode = 'human'
+        }
+        return mode;
+    }
+    function playTurn(c, mode) {
+       console.log(mode);
         //Check if someone won last turn
         if (isWon()) {
             
@@ -272,7 +287,7 @@ let gameControl = (function() {
       
         
         turnIndicator.textContent = `${player.side}'s Turn`
-        if (false) {
+        if ((mode === "minimax") && (player.type !== "human")) {
             ai.play(player, c)
         } else {
             humanPlay(player, c); 
@@ -296,7 +311,7 @@ let gameControl = (function() {
         catsGame,
         playTurn,
         humanPlay,
-        
+        getMode,
     }
 })()
 //game() starts turns:
@@ -312,9 +327,13 @@ function game(){
     let choice = ""
 
     //Show who's up
-    let turnIndicator = document.getElementById('turn-indicator')
+    let turnIndicator = document.getElementById('turn-indicator');
 
-    gameControl.playTurn(c);
+    //play a human or ai:
+    let mode = gameControl.getMode();   
+
+    //play the game
+    gameControl.playTurn(c, mode);
 }
 
 function setUp() {
