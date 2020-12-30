@@ -1,6 +1,3 @@
-//To do:
-//implement minimax functinos
-//implement play type choice
 
 
 let gameBoard = (function(){
@@ -19,6 +16,18 @@ let gameBoard = (function(){
         return squares[square]
     }
 
+    //retrieve indexed array copy
+    function getArray() {
+        fooSquares = squares.slice()
+        for (let i = 0; i<9; i++) {
+            if (fooSquares[i] === " ") {
+                fooSquares[i] = i;
+            }
+        }
+        return fooSquares;
+    }
+
+    //add event listeners to board squares
     function listen(player, c) {
     
         return (e) => {
@@ -36,7 +45,7 @@ let gameBoard = (function(){
 
     
     
-
+    //Start game over
     function reset() {
         //clear squares
         squares = [];
@@ -62,6 +71,7 @@ let gameBoard = (function(){
 
     return {
         setSquare,
+        getArray,
         getSquare,
         reset,
         listen,
@@ -69,7 +79,7 @@ let gameBoard = (function(){
 })();
 
 
-
+// Module to draw the board ui
 let displayController = (() => {
     //To Do: work out the HTML
     let draw = function () {
@@ -84,205 +94,151 @@ let displayController = (() => {
 })()
 
 
-// The functions to control game flow
-// are encapsulated in game()
+//Module for ai moves
+// currently only minimax is implemented
 let ai = (function(){
     
-    //go through each move and evaluate it using miniMax
-    function findBestMove(gameBoard, side){
-        let bestMove = '';
-        let bestMoveVal = -1000;
-        let moves = [];
-        let board = [];
-        let moveVals = [];
 
-        //find empty squares and make board array
-        for (let i = 0; i<9; i++) {
-            board.push(gameBoard.getSquare(i));
-            if (gameBoard.getSquare(i) === " ") {
-                moves.push(i)
-            }
-        }
-        //find best of possible  moves
-        for (let i = 0; i<moves.length; i++) {
-            let possibleBoard = board.slice();
-            possibleBoard[moves[i]] = side;
-        
-            let currentMoveVal = miniMax(possibleBoard, "O", 0);
-            moveVals.push(currentMoveVal)
-            if (currentMoveVal > bestMoveVal) {
-                bestMove = moves[i];
-                bestMoveVal = currentMoveVal;
-                console.log(`the best move is ${bestMove}\nIts value is ${currentMoveVal}`)
-            }
-        
-        }
-        console.log(`the value of possible moves: `, moveVals)
-        return bestMove;
-    }
-    function findWin(board, moves) {
-        for (let i = 0; i<moves.length; i++) {
-            let newBoard = board.slice()
-            newBoard[moves[i]] = "X"
-            if (gameValue(newBoard, "X") == 1) {
-                return 1;
-            } 
-        }
-        return -1;
-    }
-    
-    //run the minimax algorithm
-    function miniMax(board, side, depth) {
-        //base case
-        if (catsGame(board) || (gameValue(board, "X") !== 0)) {
-            
-                return gameValue(board, "X");
-        }
-
-        // if it's the ai's turn
-        
-        if (side === "X") {
-            return maximize(board, depth);
-        }
-
-        //else it's the humans turn
-        else {
-          //return minmize(board, depth);
-          return minimize(board, depth);
-        }
-
-        function maximize(board, depth) {
-            let bestVal = -1000;
-            for (let i = 0; i<9; i++) {
-                if (board[i] === " ") {
-                    let testboard = board.slice()
-                    testboard[i] = "X"
-                    let value = miniMax(testboard, "O", depth+1)
-                    if (value > bestVal){
-                        bestVal = value;
-                    }
-                 }
-            }
-            return bestVal;
-        }
-        function minimize(board, depth) {
-            let bestVal = 1000;
-            
-            for (let i = 0; i<9; i++) {
-                if (board[i] === " ") {
-                    let testboard = board.slice()
-                    testboard[i] = "O"
-                    let value = miniMax(testboard, "X", depth+1)
-                    if ( bestVal > value ) {
-                        bestVal = value;
-                    }
-                }
-            }
-            return bestVal;
-        }
-    
-    }
-    
-    
-    // get value of gamestate
-    function gameValue(board, side) {
-       
-        //check rows:
-        if (board[0] === board[1] && board[1] === board[2] && board[0] !== " ")  {
-            if (board[2] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-
-        } else if (board[3] === board[4] && board[4] === board[5] && board[3] !== " ") {
-            if (board[3] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-
-        } else if (board[6] === board[7] && board[7] === board[8] && board[6] !== " ") {
-            if (board[2] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-        }
-        
-        // check columns:
-
-        else if (board[0] === board[3] && board[3] === board[6] && board[0] !== " ")  {
-            if (board[6] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-
-        } else if (board[1] === board[4] && board[4] === board[7] && board[1] !== " ") {
-            if (board[7] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-            
-        } else if (board[2] === board[5] && board[5] === board[7] && board[2] !== " ") {
-            if (board[2] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-        }
-
-        // check diagonals
-        else if (board[0] === board[4] && board[4] === board[8] && board[0] !== " ")  {
-            if (board[8] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-
-        } else if (board[2] === board[4] && board[4] === board[7] && board[2] !== " ") {
-            if (board[7] === side) {
-                return 1;
-            } else {
-                return -1;
-            }
-            
-        } else {
-            return 0;
-        }
-    }
     //put the move on the board
     function makeMove(move, side) {
         gameBoard.setSquare(move, side)
     }
 
-    function catsGame (board) {
+    //stand in for random moves ai module
+    let random = (function(){
+        //TO DO
+        return {}
+    })()
 
-        if (!(board.includes(" "))) {
+    // stand in for Q learning AI:
+    let ql = (function(){
+        //TO DO
+        return {}
+    })()
+
+    //holder module to encapsulate miniMax functions
+    let mm = (function(){
+
+        // human
+        let huPlayer = "O";
+        
+        // ai
+        let aiPlayer = "X";
+        
+        // returns list of the indexes of empty spots on the board
+        function emptyIndices(board){
+            return  board.filter(s => s != "O" && s != "X");
+          }
+        
+        // winning combinations using the board indexies
+        function winning(board, player){
+            if (
+            (board[0] == player && board[1] == player && board[2] == player) ||
+            (board[3] == player && board[4] == player && board[5] == player) ||
+            (board[6] == player && board[7] == player && board[8] == player) ||
+            (board[0] == player && board[3] == player && board[6] == player) ||
+            (board[1] == player && board[4] == player && board[7] == player) ||
+            (board[2] == player && board[5] == player && board[8] == player) ||
+            (board[0] == player && board[4] == player && board[8] == player) ||
+            (board[2] == player && board[4] == player && board[6] == player)
+            ) {
             return true;
-        }
-        else {
+            } else {
             return false;
-        }
-    }
+            }
+           }
+        
+           // the main minimax function
+        function minimax(newBoard, player){
 
+            //available spots
+            let availSpots = emptyIndices(newBoard);
+        
+            // checks for the terminal states such as win, lose, and tie 
+          //and returning a value accordingly
+          if (winning(newBoard, huPlayer)){
+         
+            return {score:-10};
+         }
+           else if (winning(newBoard, aiPlayer)){
+
+           return {score:10};
+           }
+         else if (availSpots.length === 0){
+
+             return {score:0};
+         }
+         // an array to collect all the objects
+         let moves = [];
+        
+         // loop through available spots
+         for (let i = 0; i < availSpots.length; i++){
+            //create an object for each and store the index of that spot 
+            let move = {};
+              move.index = newBoard[availSpots[i]];
+        
+            // set the empty spot to the current player
+            newBoard[availSpots[i]] = player;
+            
+            /*collect the score resulted from calling minimax 
+              on the opponent of the current player*/
+            if (player == aiPlayer){
+              let result = minimax(newBoard, huPlayer);
+              move.score = result.score;
+            }
+            else{
+              let result = minimax(newBoard, aiPlayer);
+              move.score = result.score;
+            }
+        
+            // reset the spot to empty
+            newBoard[availSpots[i]] = move.index;
+        
+            // push the object to the array
+            moves.push(move);
+          }
+          // if it is the computer's turn loop over the moves and choose the move with the highest score
+          let bestMove;
+          if(player === aiPlayer){
+            let bestScore = -10000;
+            for(let i = 0; i < moves.length; i++){
+              if(moves[i].score > bestScore){
+                bestScore = moves[i].score;
+                bestMove = i;
+              }
+            }
+          } else {
+              // else loop over the moves and choose the move with the lowest score
+            let bestScore = 10000;
+            for(let i = 0; i < moves.length; i++){
+              if(moves[i].score < bestScore){
+                bestScore = moves[i].score;
+                bestMove = i;
+              }
+            }
+          }
+        
+            // return the chosen move (object) from the moves array
+            return moves[bestMove];
+        
+        }
+        return {
+            minimax,
+            winning,
+        }
+        })()
     //put all the parts together and make a move
     function play(c) {
-        let move = findBestMove(gameBoard, "X");
-        makeMove(move, "X");
+        let move = mm.minimax(gameBoard.getArray(), "X");
+        makeMove(move.index, "X");
         displayController.draw();
-        gameControl.playTurn(!c, gameControl.getMode());
-        
+        gameControl.playTurn(!c, gameControl.getMode()); 
     }
 
     return {//module functions
-        findBestMove,
-        miniMax,
-        gameValue,
         makeMove,
         play,
+        mm,
     }
 })();
 
@@ -434,7 +390,6 @@ let gameControl = (function() {
             humanPlay(player, c); 
                
         }
-        //Draw result of last move
         
          
         
